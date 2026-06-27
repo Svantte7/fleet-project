@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "KalustoHallinta",
+    "slug": "fleet-project",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#1B2B3B"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.yourcompany.kalustonhallinta",
+      "infoPlist": {
+        "NSCameraUsageDescription": "KalustoHallinta tarvitsee kameran perävaunun kuvaamiseen tarkastusraporttia varten.",
+        "NSPhotoLibraryUsageDescription": "KalustoHallinta käyttää kuvakirjastoa tarkastuskuvien valitsemiseen.",
+        "NSPhotoLibraryAddUsageDescription": "KalustoHallinta tallentaa tarkastuskuvia kuvakirjastoosi.",
+        "NSMicrophoneUsageDescription": "Kamera saattaa tarvita mikrofonia."
+      }
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "KalustoHallinta tarvitsee kameran perävaunun kuvaamiseen.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "KalustoHallinta käyttää kuvakirjastoa tarkastuskuvien valitsemiseen.",
+          "cameraPermission": "KalustoHallinta tarvitsee kameran perävaunun kuvaamiseen."
+        }
+      ]
+    ],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "95160d7c-7333-4593-b723-082518ac9093"
+      }
+    },
+    "owner": "svantte7s"
+  }
+}
