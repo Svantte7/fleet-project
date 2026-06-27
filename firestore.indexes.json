@@ -1,0 +1,29 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "inspections",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "trailerReg", "order": "ASCENDING" },
+        { "fieldPath": "createdAt",  "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "inspections",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId",    "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "inspections",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "seenByAdmin", "order": "ASCENDING" },
+        { "fieldPath": "createdAt",   "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

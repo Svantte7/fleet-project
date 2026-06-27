@@ -1,0 +1,27 @@
+// firestore.rules
+// Deploy: firebase deploy --only firestore:rules
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn()  { return request.auth != null; }
+    function uid()         { return request.auth.uid; }
+    function userDoc()     { return get(/databases/$(database)/documents/users/$(uid())).data; }
+    function isAdmin()     { return isSignedIn() && userDoc().role == 'admin'; }
+    function isActive()    { return isSignedIn() && userDoc().active == true; }
+
+    match /users/{userId} {
+      allow read:   if isSignedIn() && (uid() == userId || isAdmin());
+      allow create: if isAdmin() || uid() == userId;
+      allow update: if isSignedIn() && (uid() == userId || isAdmin());
+      allow list:   if isAdmin();
+    }
+
+    match /inspections/{insId} {
+      allow read:   if isSignedIn() && isActive() && (resource.data.userId == uid() || isAdmin());
+      allow create: if isSignedIn() && isActive();
+      allow update: if isSignedIn() && isActive() && (isAdmin() || resource.data.userId == uid());
+      allow list:   if isAdmin();
+    }
+  }
+}
