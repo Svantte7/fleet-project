@@ -1,6 +1,4 @@
 // src/utils/theme.js
-import { Platform } from 'react-native';
-
 export const C = {
   navy:        '#1B2B3B',
   navyLight:   '#243B55',
@@ -17,8 +15,6 @@ export const C = {
   danger:      '#D94F4F',
 };
 
-export const MONO = Platform.OS === 'ios' ? 'Menlo' : 'monospace';
-
 export const fmtTime = (d) =>
   new Date(d).toLocaleString('fi-FI', {
     day: '2-digit', month: '2-digit', year: 'numeric',
@@ -26,11 +22,3 @@ export const fmtTime = (d) =>
   });
 
 export const fmtReg = (v) => v.toUpperCase().replace(/[^A-Z0-9]/g, '');
-
-export const shadow = {
-  shadowColor: '#1B2B3B',
-  shadowOpacity: 0.08,
-  shadowRadius: 8,
-  shadowOffset: { width: 0, height: 2 },
-  elevation: 2,
-};
