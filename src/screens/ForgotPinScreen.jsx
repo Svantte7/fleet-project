@@ -1,6 +1,11 @@
 // src/screens/ForgotPinScreen.jsx
 import { useState } from 'react';
-import { DB } from '../data/store.js';
+import { nameToEmail } from '../firebase/auth.js';
+import { auth } from '../firebase/config.js';
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { getUserProfile } from '../firebase/firestore.js';
+import { changePIN } from '../firebase/auth.js';
+import { updateUserProfile } from '../firebase/firestore.js';
 import { C } from '../utils/theme.js';
 
 const darkCard = { width: '100%', maxWidth: 360, background: 'rgba(255,255,255,0.06)', borderRadius: 22, padding: '26px 22px', border: '1px solid rgba(255,255,255,0.1)' };
@@ -9,13 +14,24 @@ const darkLbl  = { display: 'block', color: 'rgba(255,255,255,0.45)', fontSize: 
 
 export function ForgotPinScreen({ navigate }) {
   const [name, setName] = useState('');
-  const [sent, setSent]  = useState(false);
-  const [err,  setErr]   = useState('');
+  const [sent, setSent] = useState(false);
+  const [err,  setErr]  = useState('');
+  const [busy, setBusy] = useState(false);
 
-  const send = () => {
-    const ok = DB.resetPIN(name);
-    if (!ok) { setErr('Käyttäjää ei löydy.'); return; }
-    setErr(''); setSent(true);
+  const send = async () => {
+    if (!name.trim()) { setErr('Syötä nimesi.'); return; }
+    setBusy(true); setErr('');
+    try {
+      const email = nameToEmail(name);
+      // Tarkista että käyttäjä on olemassa
+      // Lähetetään PIN-reset sähköpostilla (Firebase hoitaa)
+      await sendPasswordResetEmail(auth, email);
+      setSent(true);
+    } catch (e) {
+      setErr('Käyttäjää ei löydy tai virhe lähetyksessä.');
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -26,22 +42,22 @@ export function ForgotPinScreen({ navigate }) {
           <>
             <div style={{ color: '#fff', fontSize: 20, fontWeight: 900, marginBottom: 8 }}>PIN unohtunut</div>
             <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, lineHeight: 1.6, marginBottom: 22 }}>
-              Syötä nimesi — lähetämme uuden PIN-koodin puhelinnumeroosi.
+              Syötä nimesi — lähetämme PIN-palautuslinkin sähköpostiisi.
             </div>
             <label style={darkLbl}>NIMI</label>
             <input value={name} onChange={e => setName(e.target.value)} placeholder="Etunimi Sukunimi"
-              onKeyDown={e => e.key === 'Enter' && send()} style={darkInp} />
+              onKeyDown={e => e.key === 'Enter' && send()} style={darkInp} disabled={busy} />
             {err && <div style={{ background: 'rgba(217,79,79,0.22)', borderRadius: 9, padding: '9px 12px', color: '#ffa0a0', fontSize: 13, marginBottom: 12 }}>{err}</div>}
-            <button onClick={send} style={{ width: '100%', background: C.orange, color: '#fff', border: 'none', borderRadius: 13, padding: 14, fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>
-              📱  Lähetä uusi PIN
+            <button onClick={send} disabled={busy} style={{ width: '100%', background: C.orange, color: '#fff', border: 'none', borderRadius: 13, padding: 14, fontSize: 15, fontWeight: 800, cursor: busy ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}>
+              {busy ? '⏳  Lähetetään...' : '📱  Lähetä palautuslinkki'}
             </button>
           </>
         ) : (
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
-            <div style={{ color: '#fff', fontWeight: 800, fontSize: 16, marginBottom: 10 }}>PIN lähetetty!</div>
+            <div style={{ color: '#fff', fontWeight: 800, fontSize: 16, marginBottom: 10 }}>Palautuslinkki lähetetty!</div>
             <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: 13, lineHeight: 1.6, marginBottom: 24 }}>
-              Kirjaudu sisään uudella PIN:llä — sovellus pyytää vaihtamaan sen heti.
+              Tarkista sähköpostisi ja seuraa linkkiä PIN:n palauttamiseksi.
             </div>
             <button onClick={() => navigate('login')} style={{ width: '100%', background: 'transparent', color: C.steel, border: `1.5px solid ${C.steel}`, borderRadius: 13, padding: 13, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
               ← Takaisin kirjautumiseen
@@ -56,16 +72,28 @@ export function ForgotPinScreen({ navigate }) {
 // ── Change PIN ─────────────────────────────────────────────────────────────────
 export function ChangePinScreen({ navigate, params }) {
   const { userId, forced } = params;
-  const [p1, setP1] = useState('');
-  const [p2, setP2] = useState('');
-  const [err, setErr] = useState('');
+  const [p1,   setP1]  = useState('');
+  const [p2,   setP2]  = useState('');
+  const [err,  setErr] = useState('');
+  const [busy, setBusy]= useState(false);
 
-  const save = () => {
+  const save = async () => {
     if (p1.length < 4) { setErr('PIN täytyy olla vähintään 4 merkkiä.'); return; }
     if (p1 !== p2)     { setErr('PIN-koodit eivät täsmää.'); return; }
-    DB.updatePIN(userId, p1);
-    const u = DB.getUser(userId);
-    navigate(u.role === 'admin' ? 'adminHome' : 'driverHome', { userId });
+    setBusy(true); setErr('');
+    try {
+      await changePIN(p1);
+      await updateUserProfile(userId, { mustChangePIN: false });
+      const profile = await getUserProfile(userId);
+      navigate(profile.role === 'admin' ? 'adminHome' : 'driverHome', { userId });
+    } catch (e) {
+      if (e.code === 'auth/requires-recent-login') {
+        setErr('Kirjaudu uudelleen sisään ennen PIN:n vaihtoa.');
+      } else {
+        setErr('PIN:n vaihto epäonnistui. Yritä uudelleen.');
+      }
+      setBusy(false);
+    }
   };
 
   const pinInp = { ...darkInp, fontSize: 24, letterSpacing: '0.35em', textAlign: 'center' };
@@ -82,13 +110,13 @@ export function ChangePinScreen({ navigate, params }) {
           {forced && <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, marginTop: 8, lineHeight: 1.5 }}>Turvallisuussyistä PIN täytyy vaihtaa ennen jatkamista.</div>}
         </div>
         <label style={darkLbl}>UUSI PIN</label>
-        <input type="password" value={p1} onChange={e => setP1(e.target.value)} placeholder="••••" style={pinInp} />
+        <input type="password" value={p1} onChange={e => setP1(e.target.value)} placeholder="••••" style={pinInp} disabled={busy} />
         <label style={darkLbl}>VAHVISTA PIN</label>
         <input type="password" value={p2} onChange={e => setP2(e.target.value)} placeholder="••••"
-          onKeyDown={e => e.key === 'Enter' && save()} style={pinInp} />
+          onKeyDown={e => e.key === 'Enter' && save()} style={pinInp} disabled={busy} />
         {err && <div style={{ background: 'rgba(217,79,79,0.22)', borderRadius: 9, padding: '9px 12px', color: '#ffa0a0', fontSize: 13, marginBottom: 12 }}>{err}</div>}
-        <button onClick={save} style={{ width: '100%', background: C.orange, color: '#fff', border: 'none', borderRadius: 13, padding: 14, fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>
-          ✅  Tallenna uusi PIN
+        <button onClick={save} disabled={busy} style={{ width: '100%', background: C.orange, color: '#fff', border: 'none', borderRadius: 13, padding: 14, fontSize: 15, fontWeight: 800, cursor: busy ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}>
+          {busy ? '⏳  Tallennetaan...' : '✅  Tallenna uusi PIN'}
         </button>
       </div>
     </div>

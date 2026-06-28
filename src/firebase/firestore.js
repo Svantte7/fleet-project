@@ -32,6 +32,12 @@ export const getAllDrivers = async () => {
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 };
 
+export const getAllUsers = async () => {
+  const q    = query(collection(db, 'users'), orderBy('name'));
+  const snap = await getDocs(q);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+};
+
 export const deactivateUser = (uid) =>
   updateDoc(doc(db, 'users', uid), { active: false });
 

@@ -1,10 +1,10 @@
-// src/App.jsx
-import { useState, useCallback } from 'react';
-import LoginScreen from './screens/LoginScreen.jsx';
-import { ForgotPinScreen, ChangePinScreen } from './screens/ForgotPinScreen.jsx';
-import { DriverHomeScreen, RegInputScreen, SuccessScreen } from './screens/DriverScreens.jsx';
-import PhotoScreen from './screens/PhotoScreen.jsx';
-import { AdminHomeScreen, AdminReportsScreen, AdminUsersScreen } from './screens/AdminScreens.jsx';
+import { useState, useCallback, useEffect } from "react";
+import LoginScreen from "./screens/LoginScreen.jsx";
+import { ForgotPinScreen, ChangePinScreen } from "./screens/ForgotPinScreen.jsx";
+import { DriverHomeScreen, RegInputScreen, SuccessScreen } from "./screens/DriverScreens.jsx";
+import PhotoScreen from "./screens/PhotoScreen.jsx";
+import { AdminHomeScreen, AdminReportsScreen, AdminUsersScreen } from "./screens/AdminScreens.jsx";
+import { C } from "./utils/theme.js";
 
 const SCREENS = {
   login:        LoginScreen,
@@ -20,7 +20,7 @@ const SCREENS = {
 };
 
 export default function App() {
-  const [screen, setScreen] = useState('login');
+  const [screen, setScreen] = useState("login");
   const [params, setParams] = useState({});
 
   const navigate = useCallback((to, p = {}) => {
@@ -30,9 +30,8 @@ export default function App() {
   }, []);
 
   const Screen = SCREENS[screen] ?? LoginScreen;
-
   return (
-    <div style={{ minHeight: '100vh' }}>
+    <div style={{ minHeight: "100vh" }}>
       <Screen navigate={navigate} params={params} />
     </div>
   );
