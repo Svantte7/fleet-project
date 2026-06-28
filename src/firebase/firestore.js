@@ -103,6 +103,9 @@ export const subscribeInspections = (cb) =>
     snap => cb(snap.docs.map(d => ({ id: d.id, ...d.data() })))
   );
 
+export const markDamageAcknowledged = (insId, acknowledged) =>
+  updateDoc(doc(db, 'inspections', insId), { damageAcknowledged: acknowledged });
+
 // ── Remembered trucks (stored per user in their profile) ──────────────────────
 export const getRememberedTruck = async (userId) => {
   const u = await getUserProfile(userId);

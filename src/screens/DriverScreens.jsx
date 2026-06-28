@@ -172,25 +172,35 @@ export function DriverHomeScreen({ navigate, params, device }) {
           </div>
         )}
 
-        {inspections.map(ins => (
-          <Card key={ins.id} onClick={() => setSelectedInspection(ins)} style={{ cursor: 'pointer' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontWeight: 800, fontSize: 16, color: C.text, fontFamily: 'monospace' }}>{ins.trailerReg}</div>
-                <div style={{ color: C.muted, fontSize: 12, marginTop: 2 }}>Vetoauto: <b style={{ fontFamily: 'monospace' }}>{ins.truckReg}</b></div>
-                <div style={{ color: C.muted, fontSize: 11, marginTop: 3 }}>
-                  {fmtTs(ins.createdAt)}
+        {inspections.map(ins => {
+          const dmg = ins.type === 'departure'
+            ? ins.checklistItems?.some(i => i.status === 'defect' || i.status === 'notice')
+            : (ins.damagePhotos?.length > 0) || !!ins.damageDescription;
+          const ack = ins.damageAcknowledged;
+          return (
+            <Card key={ins.id} onClick={() => setSelectedInspection(ins)} style={{ cursor: 'pointer', border: dmg && !ack ? `1.5px solid rgba(196,28,28,0.35)` : undefined }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                    <span style={{ fontWeight: 800, fontSize: 16, color: C.text, fontFamily: 'monospace' }}>{ins.trailerReg}</span>
+                    {dmg && <span title={ack ? 'Vaurio huomioitu' : 'Vaurio ei vielä huomioitu'}>{ack ? '✅' : '⚠️'}</span>}
+                  </div>
+                  <div style={{ color: C.muted, fontSize: 12 }}>Vetoauto: <b style={{ fontFamily: 'monospace' }}>{ins.truckReg}</b></div>
+                  <div style={{ color: C.muted, fontSize: 11, marginTop: 3 }}>{fmtTs(ins.createdAt)}</div>
+                  {ins.type === 'departure'
+                    ? <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>🚦 Ajoonlähtötarkastus</div>
+                    : <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>{(ins.photos?.length || 0)} peruskuvaa{(ins.damagePhotos?.length || 0) > 0 ? ` · ${ins.damagePhotos.length} vauriokuvaa` : ''}</div>
+                  }
+                  {dmg && ack && <div style={{ color: C.success, fontSize: 11, fontWeight: 700, marginTop: 3 }}>✓ Työnjohtaja huomioinut</div>}
+                  {dmg && !ack && <div style={{ color: C.danger, fontSize: 11, fontWeight: 700, marginTop: 3 }}>⚠️ Odottaa huomiointia</div>}
                 </div>
-                <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>
-                  {(ins.photos?.length || 0)} peruskuvaa{(ins.damagePhotos?.length || 0) > 0 ? ` · ${ins.damagePhotos.length} vauriokuvaa` : ''}
-                </div>
+                <Badge color={ins.completedAt ? C.success : C.orange} bg={ins.completedAt ? 'rgba(46,158,107,0.2)' : 'rgba(196,28,28,0.15)'}>
+                  {ins.completedAt ? '✓ Valmis' : '⏳ Kesken'}
+                </Badge>
               </div>
-              <Badge color={ins.completedAt ? C.success : C.orange} bg={ins.completedAt ? 'rgba(46,158,107,0.2)' : 'rgba(196,28,28,0.15)'}>
-                {ins.completedAt ? '✓ Valmis' : '⏳ Kesken'}
-              </Badge>
-            </div>
-          </Card>
-        ))}
+            </Card>
+          );
+        })}
       </div>
     </div>
   );

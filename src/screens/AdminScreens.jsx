@@ -4,7 +4,7 @@ import { SIDES } from '../data/constants.js';
 import {
   getAllInspections, getByTrailer, getVisibleUsers,
   markAllSeen, getNewCount,
-  deactivateUser, updateUserRole,
+  deactivateUser, updateUserRole, markDamageAcknowledged,
 } from '../firebase/firestore.js';
 import { registerDriver, resetUserPassword } from '../firebase/auth.js';
 import { C, fmtTime, fmtReg } from '../utils/theme.js';
@@ -59,6 +59,12 @@ const T = {
   driversList:   'KÄYTTÄJÄT',
 };
 
+// Tunnistaa onko tarkastuksessa vaurioita (kuvaus- tai checklist-tarkastus)
+const hasDamage = (ins) => {
+  if (ins.type === 'departure') return ins.checklistItems?.some(i => i.status === 'defect' || i.status === 'notice');
+  return (ins.damagePhotos?.length > 0) || !!ins.damageDescription;
+};
+
 // ── Admin Home ─────────────────────────────────────────────────────────────────
 export function AdminHomeScreen({ navigate, params, device }) {
   const { userId, role } = params;
@@ -70,9 +76,10 @@ export function AdminHomeScreen({ navigate, params, device }) {
     Promise.all([getNewCount(), getAllInspections(), getVisibleUsers(role)]).then(([nc, ins, users]) => {
       setNewCount(nc);
       setTotals({
-        ins:      ins.length,
-        trailers: [...new Set(ins.map(i => i.trailerReg))].length,
-        users:    users.length,
+        ins:        ins.length,
+        trailers:   [...new Set(ins.map(i => i.trailerReg))].length,
+        users:      users.length,
+        unackDmg:   ins.filter(i => hasDamage(i) && !i.damageAcknowledged).length,
       });
       setLoading(false);
     });
@@ -99,10 +106,24 @@ export function AdminHomeScreen({ navigate, params, device }) {
           </Card>
         )}
 
+        {/* Tilastokortit */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 14 }}>
+          {[
+            { label: 'Tarkastuksia', val: totals.ins,      color: C.steel },
+            { label: 'Perävaunuja',  val: totals.trailers, color: C.navyLight },
+            { label: 'Huomioimatta', val: totals.unackDmg, color: totals.unackDmg > 0 ? C.danger : C.success },
+          ].map(s => (
+            <Card key={s.label} style={{ textAlign: 'center', padding: '12px 8px', marginBottom: 0 }}>
+              <div style={{ fontSize: 22, fontWeight: 900, color: s.color }}>{loading ? '…' : s.val}</div>
+              <div style={{ fontSize: 10, color: C.muted, fontWeight: 700, marginTop: 2 }}>{s.label}</div>
+            </Card>
+          ))}
+        </div>
+
         {[
-          { icon: '📋', title: T.reports,    sub: loading ? T.loading : `${totals.ins} ${T.inspections}`,  badge: newCount || null, color: C.steel,   screen: 'adminReports' },
-          { icon: '👥', title: T.drivers,    sub: loading ? T.loading : `${totals.users} ${T.users}`,      badge: null,             color: C.success, screen: 'adminUsers' },
-          { icon: '👤', title: 'Profiili',   sub: 'Omat tiedot ja salasanan vaihto',                       badge: null,             color: C.steel,   screen: 'profile' },
+          { icon: '📋', title: T.reports,  sub: loading ? T.loading : `${totals.ins} ${T.inspections}`,  badge: newCount || null, color: C.steel,   screen: 'adminReports' },
+          { icon: '👥', title: T.drivers,  sub: loading ? T.loading : `${totals.users} ${T.users}`,      badge: null,             color: C.success, screen: 'adminUsers' },
+          { icon: '👤', title: 'Profiili', sub: 'Omat tiedot ja salasanan vaihto',                       badge: null,             color: C.steel,   screen: 'profile' },
         ].map(item => (
           <Card key={item.title} onClick={() => navigate(item.screen, { userId, role })} style={{ cursor: 'pointer' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
@@ -151,6 +172,14 @@ export function AdminReportsScreen({ navigate, params, device }) {
 
   // Detail view
   if (selIns) {
+    const dmg = hasDamage(selIns);
+    const ack = selIns.damageAcknowledged;
+    const toggleSelAck = async () => {
+      const next = !ack;
+      await markDamageAcknowledged(selIns.id, next);
+      setSelIns(prev => ({ ...prev, damageAcknowledged: next }));
+      setRegIns(prev => prev.map(i => i.id === selIns.id ? { ...i, damageAcknowledged: next } : i));
+    };
     return (
       <div style={{ minHeight: '100vh', background: C.bg }}>
         {lightbox && (
@@ -173,10 +202,24 @@ export function AdminReportsScreen({ navigate, params, device }) {
                 <div style={{ fontWeight: 800, color: C.text, fontSize: 15 }}>👤 {selIns.userName}</div>
                 <div style={{ color: C.muted, fontSize: 13, marginTop: 3 }}>🚛 <b style={{ fontFamily: 'monospace' }}>{selIns.truckReg}</b></div>
                 <div style={{ color: C.muted, fontSize: 11, marginTop: 3 }}>📅 {fmtTs(selIns.createdAt)}</div>
+                {selIns.type === 'departure' && <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>🚦 Ajoonlähtötarkastus</div>}
               </div>
-              <Badge color={selIns.completedAt ? C.success : C.orange} bg={selIns.completedAt ? 'rgba(46,158,107,0.2)' : 'rgba(196,28,28,0.15)'}>
-                {selIns.completedAt ? `✓ ${T.ready}` : `⏳ ${T.pending}`}
-              </Badge>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+                <Badge color={selIns.completedAt ? C.success : C.orange} bg={selIns.completedAt ? 'rgba(46,158,107,0.2)' : 'rgba(196,28,28,0.15)'}>
+                  {selIns.completedAt ? `✓ ${T.ready}` : `⏳ ${T.pending}`}
+                </Badge>
+                {dmg && (
+                  <button onClick={toggleSelAck} style={{
+                    display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 9,
+                    border: `1.5px solid ${ack ? 'rgba(46,158,107,0.5)' : 'rgba(196,28,28,0.5)'}`,
+                    background: ack ? 'rgba(46,158,107,0.12)' : 'rgba(196,28,28,0.08)',
+                    color: ack ? C.success : C.danger, fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+                  }}>
+                    <span style={{ width: 16, height: 16, borderRadius: 4, border: `2px solid currentColor`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 }}>{ack ? '✓' : ''}</span>
+                    {ack ? 'Huomioitu' : '⚠️ Merkitse huomioiduksi'}
+                  </button>
+                )}
+              </div>
             </div>
           </Card>
 
@@ -228,28 +271,52 @@ export function AdminReportsScreen({ navigate, params, device }) {
 
   // Trailer inspection list
   if (selReg) {
+    const toggleAck = async (e, ins) => {
+      e.stopPropagation();
+      const next = !ins.damageAcknowledged;
+      await markDamageAcknowledged(ins.id, next);
+      setRegIns(prev => prev.map(i => i.id === ins.id ? { ...i, damageAcknowledged: next } : i));
+    };
     return (
       <div style={{ minHeight: '100vh', background: C.bg }}>
         <AppHeader title={selReg} subtitle="Tarkastukset" onBack={() => setSelReg(null)} onHome={() => navigate('adminHome', { userId, role })} device={device} />
         <div style={{ padding: device?.isPhone ? '12px' : '16px', maxWidth: 600, margin: '0 auto' }}>
-          {regIns.map(ins => (
-            <Card key={ins.id} onClick={() => setSelIns(ins)} style={{ cursor: 'pointer' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
-                <div>
-                  <div style={{ fontWeight: 800, color: C.text, fontSize: 14 }}>👤 {ins.userName}</div>
-                  <div style={{ color: C.muted, fontSize: 12, marginTop: 2 }}>🚛 <b style={{ fontFamily: 'monospace' }}>{ins.truckReg}</b></div>
-                  <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>📅 {fmtTs(ins.createdAt)}</div>
-                  <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>{T.photoCount(ins.photos?.length || 0, ins.damagePhotos?.length || 0)}</div>
+          {regIns.map(ins => {
+            const dmg = hasDamage(ins);
+            const ack = ins.damageAcknowledged;
+            return (
+              <Card key={ins.id} onClick={() => setSelIns(ins)} style={{ cursor: 'pointer', border: dmg && !ack ? `1.5px solid rgba(196,28,28,0.4)` : undefined }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                      <span style={{ fontWeight: 800, color: C.text, fontSize: 14 }}>👤 {ins.userName}</span>
+                      {dmg && <span style={{ fontSize: 14 }} title={ack ? 'Huomioitu' : 'Vaurioita – ei huomioitu'}>{ack ? '✅' : '⚠️'}</span>}
+                    </div>
+                    <div style={{ color: C.muted, fontSize: 12, marginTop: 1 }}>🚛 <b style={{ fontFamily: 'monospace' }}>{ins.truckReg}</b></div>
+                    <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>📅 {fmtTs(ins.createdAt)}</div>
+                    {ins.type !== 'departure' && <div style={{ color: C.muted, fontSize: 11, marginTop: 1 }}>{T.photoCount(ins.photos?.length || 0, ins.damagePhotos?.length || 0)}</div>}
+                    {ins.type === 'departure' && <div style={{ color: C.muted, fontSize: 11, marginTop: 1 }}>Ajoonlähtötarkastus</div>}
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+                    <Badge color={ins.completedAt ? C.success : C.orange} bg={ins.completedAt ? 'rgba(46,158,107,0.2)' : 'rgba(196,28,28,0.15)'}>
+                      {ins.completedAt ? `✓ ${T.ready}` : `⏳ ${T.pending}`}
+                    </Badge>
+                    {dmg && (
+                      <button onClick={e => toggleAck(e, ins)} style={{
+                        display: 'flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 8,
+                        border: `1.5px solid ${ack ? 'rgba(46,158,107,0.5)' : 'rgba(196,28,28,0.4)'}`,
+                        background: ack ? 'rgba(46,158,107,0.12)' : 'rgba(196,28,28,0.08)',
+                        color: ack ? C.success : C.danger, fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+                      }}>
+                        <span style={{ width: 14, height: 14, borderRadius: 3, border: `2px solid currentColor`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9 }}>{ack ? '✓' : ''}</span>
+                        Huomioitu
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
-                  <Badge color={ins.completedAt ? C.success : C.orange} bg={ins.completedAt ? 'rgba(46,158,107,0.2)' : 'rgba(196,28,28,0.15)'}>
-                    {ins.completedAt ? `✓ ${T.ready}` : `⏳ ${T.pending}`}
-                  </Badge>
-                  <div style={{ color: C.border, fontSize: 20 }}>›</div>
-                </div>
-              </div>
-            </Card>
-          ))}
+              </Card>
+            );
+          })}
         </div>
       </div>
     );
@@ -283,13 +350,17 @@ export function AdminReportsScreen({ navigate, params, device }) {
         {loading && <div style={{ textAlign: 'center', padding: 20, color: C.muted }}>Ladataan...</div>}
         {!loading && filtered.length === 0 && <div style={{ textAlign: 'center', padding: '30px 0', color: C.muted }}>{T.noResults}</div>}
         {filtered.map(reg => {
-          const ins    = allIns.filter(i => i.trailerReg === reg);
-          const latest = ins[0];
+          const ins      = allIns.filter(i => i.trailerReg === reg);
+          const latest   = ins[0];
+          const unackDmg = ins.filter(i => hasDamage(i) && !i.damageAcknowledged).length;
           return (
-            <Card key={reg} onClick={() => setSelReg(reg)} style={{ cursor: 'pointer' }}>
+            <Card key={reg} onClick={() => setSelReg(reg)} style={{ cursor: 'pointer', border: unackDmg > 0 ? `1.5px solid rgba(196,28,28,0.35)` : undefined }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <div style={{ fontFamily: 'monospace', fontWeight: 900, fontSize: 18, color: C.text }}>{reg}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontFamily: 'monospace', fontWeight: 900, fontSize: 18, color: C.text }}>{reg}</span>
+                    {unackDmg > 0 && <span style={{ background: 'rgba(196,28,28,0.15)', color: C.danger, fontSize: 11, fontWeight: 800, padding: '2px 8px', borderRadius: 18 }}>⚠️ {unackDmg}</span>}
+                  </div>
                   <div style={{ color: C.muted, fontSize: 12, marginTop: 2 }}>
                     {T.inspCount(ins.length)} · {fmtTs(latest?.createdAt)}
                   </div>
