@@ -1,18 +1,22 @@
 // src/utils/theme.js
 export const C = {
-  navy:        '#1B2B3B',
-  navyLight:   '#243B55',
-  steel:       '#2D6A9F',
-  steelLight:  '#3D80BF',
-  orange:      '#E87B35',
-  orangeLight: '#F5993A',
-  bg:          '#F0F4F8',
-  surface:     '#FFFFFF',
-  border:      '#D0D9E2',
-  muted:       '#6B7C8E',
-  text:        '#1A2535',
-  success:     '#2E9E6B',
-  danger:      '#D94F4F',
+  // Specto brand palette
+  navy:        '#4B0000',   // very dark red (replaces navy)
+  navyLight:   '#7B0000',   // dark maroon
+  steel:       '#C41C1C',   // primary red
+  steelLight:  '#D93030',   // lighter red
+  orange:      '#C41C1C',   // CTA (same as primary)
+  orangeLight: '#E02E2E',
+  accent:      '#FCA5A5',   // light pink accent
+
+  bg:      '#F8F7F4',   // warm off-white
+  surface: '#FFFFFF',
+  border:  '#FEE2E2',   // light red-tinted border
+  muted:   '#9CA3AF',
+  text:    '#2D0000',   // very dark red-tinted text
+
+  success: '#2E9E6B',
+  danger:  '#C41C1C',
 };
 
 export const fmtTime = (d) =>

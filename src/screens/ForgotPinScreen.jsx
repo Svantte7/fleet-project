@@ -78,7 +78,7 @@ export function ChangePinScreen({ navigate, params }) {
   const [busy, setBusy]= useState(false);
 
   const save = async () => {
-    if (p1.length < 4) { setErr('PIN täytyy olla vähintään 4 merkkiä.'); return; }
+    if (p1.length < 6) { setErr('PIN täytyy olla vähintään 6 merkkiä.'); return; }
     if (p1 !== p2)     { setErr('PIN-koodit eivät täsmää.'); return; }
     setBusy(true); setErr('');
     try {

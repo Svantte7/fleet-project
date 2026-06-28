@@ -22,7 +22,7 @@ export const loginWithEmail = (email, password) =>
 // role = 'driver' | 'admin'
 export const registerDriver = async (name, phone, role = 'driver') => {
   const email = nameToEmail(name);
-  const cred  = await createUserWithEmailAndPassword(auth, email, '1234');
+  const cred  = await createUserWithEmailAndPassword(auth, email, '112233');
   await createUserProfile(cred.user.uid, {
     name, phone, role,
     mustChangePIN: true, active: true, email,

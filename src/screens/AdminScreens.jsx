@@ -418,7 +418,7 @@ export function AdminUsersScreen({ navigate, params }) {
                   <div style={{ fontSize: 13, color: C.text, marginBottom: 3 }}><b>{T.createdName}:</b> {created.name}</div>
                   <div style={{ fontSize: 13, color: C.text, marginBottom: 3 }}><b>{T.createdPhone}:</b> {created.phone}</div>
                   <div style={{ fontSize: 13, color: C.text, marginBottom: 3 }}><b>Rooli:</b> {roleIcon(created.role)} {roleLabel(created.role)}</div>
-                  <div style={{ fontSize: 13, color: C.text }}><b>{T.createdPin}:</b> 1234</div>
+                  <div style={{ fontSize: 13, color: C.text }}><b>{T.createdPin}:</b> 112233</div>
                   <div style={{ fontSize: 11, color: C.muted, marginTop: 6 }}>{T.createdNote}</div>
                 </div>
                 <Btn onClick={() => { setShowForm(false); setCreated(null); }} sm>{T.close}</Btn>
