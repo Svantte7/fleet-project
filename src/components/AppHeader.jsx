@@ -11,7 +11,7 @@ export default function AppHeader({ title, subtitle, onBack, onHome, rightLabel,
       padding: `${isPhone ? 10 : 14}px ${isPhone ? 12 : 16}px`,
       paddingTop: `calc(${isPhone ? 10 : 14}px + env(safe-area-inset-top))`,
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 2px 16px rgba(75,0,0,0.3)',
+      position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 2px 16px rgba(0,0,0,0.35)',
     }}>
       {/* Left */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: isPhone ? 74 : 88, minWidth: 44 }}>

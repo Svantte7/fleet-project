@@ -1,19 +1,19 @@
 // src/utils/theme.js
 export const C = {
-  // Specto brand palette
-  navy:        '#4B0000',   // very dark red (replaces navy)
-  navyLight:   '#7B0000',   // dark maroon
-  steel:       '#C41C1C',   // primary red
-  steelLight:  '#D93030',   // lighter red
-  orange:      '#C41C1C',   // CTA (same as primary)
+  // Specto brand palette — dark navy matching landing page
+  navy:        '#0D1B2A',   // dark navy (background)
+  navyLight:   '#1E3A5F',   // steel blue (header gradient)
+  steel:       '#C41C1C',   // primary red CTA
+  steelLight:  '#D93030',
+  orange:      '#C41C1C',
   orangeLight: '#E02E2E',
   accent:      '#FCA5A5',   // light pink accent
 
-  bg:      '#F8F7F4',   // warm off-white
-  surface: '#FFFFFF',
-  border:  '#FEE2E2',   // light red-tinted border
-  muted:   '#9CA3AF',
-  text:    '#2D0000',   // very dark red-tinted text
+  bg:      '#0D1B2A',   // dark navy
+  surface: '#162236',   // card surface
+  border:  'rgba(255,255,255,0.10)',
+  muted:   '#8B9BB4',
+  text:    '#F0EAE4',   // warm near-white
 
   success: '#2E9E6B',
   danger:  '#C41C1C',

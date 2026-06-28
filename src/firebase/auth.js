@@ -17,7 +17,7 @@ export const nameToEmail = (name) =>
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/\s+/g, '.')
-    .replace(/[^a-z0-9.]/g, '') + '@kalustohallinta.local';
+    .replace(/[^a-z0-9.]/g, '') + '@specto-fleet.local';
 
 export const loginWithEmail = (email, password) =>
   signInWithEmailAndPassword(auth, email, password);

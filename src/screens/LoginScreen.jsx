@@ -28,7 +28,7 @@ export default function LoginScreen({ navigate, device }) {
           navigate(profile.role === 'admin' || profile.role === 'moderator' ? 'adminHome' : 'driverHome', { userId: uid, userName: profile.name, role: profile.role });
         }
       } else {
-        setErr(email.includes('@kalustohallinta.local')
+        setErr(email.includes('@specto-fleet.local')
           ? 'Vanha samanniminen käyttäjätili ei ole aktiivinen. Kirjaudu uuden tunnuksen sähköpostiosoitteella.'
           : 'Käyttäjätili ei ole aktiivinen.');
         setBusy(false);

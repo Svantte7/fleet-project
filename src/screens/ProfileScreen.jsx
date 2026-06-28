@@ -177,7 +177,7 @@ export default function ProfileScreen({ navigate, params, device }) {
             <div style={{ background: 'rgba(217,79,79,0.1)', borderRadius: 9, padding: '9px 12px', color: C.danger, fontSize: 13, marginBottom: 12 }}>{err}</div>
           )}
           {success && (
-            <div style={{ background: '#E8F5EC', borderRadius: 9, padding: '9px 12px', color: C.success, fontSize: 13, marginBottom: 12 }}>✓ {success}</div>
+            <div style={{ background: 'rgba(46,158,107,0.18)', borderRadius: 9, padding: '9px 12px', color: C.success, fontSize: 13, marginBottom: 12 }}>✓ {success}</div>
           )}
 
           <Btn onClick={save} full disabled={saving || !isComplete} variant={isComplete ? 'primary' : 'ghost'}>
@@ -206,7 +206,7 @@ export default function ProfileScreen({ navigate, params, device }) {
             <>
               <div style={{ fontWeight: 800, color: C.text, fontSize: 15, marginBottom: 14 }}>Vaihda salasana</div>
               {pinOk ? (
-                <div style={{ background: '#E8F5EC', borderRadius: 9, padding: '12px', textAlign: 'center', color: C.success, fontWeight: 700 }}>✓ Salasana vaihdettu!</div>
+                <div style={{ background: 'rgba(46,158,107,0.18)', borderRadius: 9, padding: '12px', textAlign: 'center', color: C.success, fontWeight: 700 }}>✓ Salasana vaihdettu!</div>
               ) : (
                 <>
                   <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 5 }}>UUSI SALASANA</label>

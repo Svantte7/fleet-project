@@ -56,7 +56,7 @@ export function DriverHomeScreen({ navigate, params, device }) {
                 <div style={{ color: C.muted, fontSize: 13, marginTop: 4 }}>Vetoauto: <b style={{ fontFamily: 'monospace' }}>{ins.truckReg}</b></div>
                 <div style={{ color: C.muted, fontSize: 11, marginTop: 4 }}>{fmtTs(ins.createdAt)}</div>
               </div>
-              <Badge color={ins.completedAt ? C.success : C.orange} bg={ins.completedAt ? '#E8F5EC' : '#FFF3E0'}>
+              <Badge color={ins.completedAt ? C.success : C.orange} bg={ins.completedAt ? 'rgba(46,158,107,0.2)' : 'rgba(196,28,28,0.15)'}>
                 {ins.completedAt ? 'Valmis' : 'Kesken'}
               </Badge>
             </div>
@@ -172,7 +172,7 @@ export function DriverHomeScreen({ navigate, params, device }) {
                   {(ins.photos?.length || 0)} peruskuvaa{(ins.damagePhotos?.length || 0) > 0 ? ` · ${ins.damagePhotos.length} vauriokuvaa` : ''}
                 </div>
               </div>
-              <Badge color={ins.completedAt ? C.success : C.orange} bg={ins.completedAt ? '#E8F5EC' : '#FFF3E0'}>
+              <Badge color={ins.completedAt ? C.success : C.orange} bg={ins.completedAt ? 'rgba(46,158,107,0.2)' : 'rgba(196,28,28,0.15)'}>
                 {ins.completedAt ? '✓ Valmis' : '⏳ Kesken'}
               </Badge>
             </div>

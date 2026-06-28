@@ -142,7 +142,7 @@ export default function PhotoScreen({ navigate, params, device }) {
               <div style={{ fontWeight: 800, color: C.text, fontSize: 14 }}>Vauriot / huomiot</div>
               <div style={{ color: C.muted, fontSize: 11 }}>{dmgPhotos.length} kuvaa · useita sallittu</div>
             </div>
-            {dmgPhotos.length > 0 && <span style={{ background: '#E8F5EC', color: C.success, fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 9 }}>✓ Kuvattuna</span>}
+            {dmgPhotos.length > 0 && <span style={{ background: 'rgba(46,158,107,0.18)', color: C.success, fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 9 }}>✓ Kuvattuna</span>}
           </div>
 
           {dmgPhotos.length > 0 && (

@@ -5,7 +5,7 @@ import { HttpsError, onCall } from 'firebase-functions/v2/https';
 
 initializeApp();
 
-const db = getFirestore('kalustohallinta');
+const db = getFirestore('specto-fleet');
 
 const isValidPassword = (password) =>
   typeof password === 'string' && password.length >= 6 && /\d/.test(password);

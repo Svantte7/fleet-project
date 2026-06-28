@@ -174,7 +174,7 @@ export function AdminReportsScreen({ navigate, params, device }) {
                 <div style={{ color: C.muted, fontSize: 13, marginTop: 3 }}>🚛 <b style={{ fontFamily: 'monospace' }}>{selIns.truckReg}</b></div>
                 <div style={{ color: C.muted, fontSize: 11, marginTop: 3 }}>📅 {fmtTs(selIns.createdAt)}</div>
               </div>
-              <Badge color={selIns.completedAt ? C.success : C.orange} bg={selIns.completedAt ? '#E8F5EC' : '#FFF3E0'}>
+              <Badge color={selIns.completedAt ? C.success : C.orange} bg={selIns.completedAt ? 'rgba(46,158,107,0.2)' : 'rgba(196,28,28,0.15)'}>
                 {selIns.completedAt ? `✓ ${T.ready}` : `⏳ ${T.pending}`}
               </Badge>
             </div>
@@ -242,7 +242,7 @@ export function AdminReportsScreen({ navigate, params, device }) {
                   <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>{T.photoCount(ins.photos?.length || 0, ins.damagePhotos?.length || 0)}</div>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
-                  <Badge color={ins.completedAt ? C.success : C.orange} bg={ins.completedAt ? '#E8F5EC' : '#FFF3E0'}>
+                  <Badge color={ins.completedAt ? C.success : C.orange} bg={ins.completedAt ? 'rgba(46,158,107,0.2)' : 'rgba(196,28,28,0.15)'}>
                     {ins.completedAt ? `✓ ${T.ready}` : `⏳ ${T.pending}`}
                   </Badge>
                   <div style={{ color: C.border, fontSize: 20 }}>›</div>
@@ -456,7 +456,7 @@ export function AdminUsersScreen({ navigate, params, device }) {
             ) : (
               <>
                 <div style={{ fontWeight: 800, color: C.text, fontSize: 15, marginBottom: 12 }}>✅ {T.created}</div>
-                <div style={{ background: '#E8F5EC', borderRadius: 11, padding: '13px 15px', marginBottom: 12 }}>
+                <div style={{ background: 'rgba(46,158,107,0.15)', borderRadius: 11, padding: '13px 15px', marginBottom: 12 }}>
                   <div style={{ fontSize: 13, color: C.text, marginBottom: 3 }}><b>{T.createdName}:</b> {created.name}</div>
                   <div style={{ fontSize: 13, color: C.text, marginBottom: 3 }}><b>{T.createdPhone}:</b> {created.phone}</div>
                   <div style={{ fontSize: 13, color: C.text, marginBottom: 3 }}><b>Sähköposti:</b> {created.email}</div>
@@ -508,10 +508,10 @@ export function AdminUsersScreen({ navigate, params, device }) {
 
                 {/* Status */}
                 <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-                  <span style={{ background: selectedUser.active ? '#E8F5EC' : '#FEE2E2', color: selectedUser.active ? C.success : C.danger, fontSize: 12, fontWeight: 700, padding: '4px 12px', borderRadius: 18 }}>
+                  <span style={{ background: selectedUser.active ? 'rgba(46,158,107,0.18)' : 'rgba(196,28,28,0.18)', color: selectedUser.active ? C.success : C.danger, fontSize: 12, fontWeight: 700, padding: '4px 12px', borderRadius: 18 }}>
                     {selectedUser.active ? `🟢 ${T.active}` : `🔴 ${T.deactivated}`}
                   </span>
-                  <span style={{ background: selectedUser.profileComplete ? '#E8F5EC' : '#FFF3E0', color: selectedUser.profileComplete ? C.success : C.orange, fontSize: 12, fontWeight: 700, padding: '4px 12px', borderRadius: 18 }}>
+                  <span style={{ background: selectedUser.profileComplete ? 'rgba(46,158,107,0.18)' : 'rgba(196,28,28,0.12)', color: selectedUser.profileComplete ? C.success : C.orange, fontSize: 12, fontWeight: 700, padding: '4px 12px', borderRadius: 18 }}>
                     {selectedUser.profileComplete ? '✓ Profiili valmis' : '⚠ Profiili kesken'}
                   </span>
                 </div>

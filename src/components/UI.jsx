@@ -33,7 +33,7 @@ export function Card({ children, onClick, style = {} }) {
       onClick={onClick}
       style={{
         background: C.surface, borderRadius: 14, padding: '16px',
-        boxShadow: '0 2px 12px rgba(27,43,59,0.08)', marginBottom: 12,
+        boxShadow: '0 2px 12px rgba(0,0,0,0.25)', marginBottom: 12,
         cursor: onClick ? 'pointer' : 'default',
         minWidth: 0,
         overflowWrap: 'anywhere',

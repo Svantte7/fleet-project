@@ -6,25 +6,24 @@ import { getStorage }    from 'firebase/storage';
 import { getFunctions }  from 'firebase/functions';
 
 export const firebaseConfig = {
-  apiKey:            "AIzaSyABd2vFIMDhiqea61ZdQQSgozmNRmQu_Kg",
-  authDomain:        "kalustohallinta.firebaseapp.com",
-  projectId:         "kalustohallinta",
-  storageBucket:     "kalustohallinta.firebasestorage.app",
-  messagingSenderId: "611759904739",
-  appId:             "1:611759904739:web:1754bac9bf5629f3ceb2d6",
-  measurementId:     "G-0F26NMF3M2",
+  apiKey:            "AIzaSyA3DskxpxA3v7fdKVdBrTrigYglZYBvdv0",
+  authDomain:        "specto-fleet.firebaseapp.com",
+  projectId:         "specto-fleet",
+  storageBucket:     "specto-fleet.firebasestorage.app",
+  messagingSenderId: "587664879760",
+  appId:             "1:587664879760:web:d672e44048fb415a572815",
 };
 
 const app = initializeApp(firebaseConfig);
 export const auth    = getAuth(app);
-export const db      = getFirestore(app, "kalustohallinta");
+export const db      = getFirestore(app, "specto-fleet");
 export const storage = getStorage(app);
 export const functions = getFunctions(app, "europe-west1");
 export default app;
 
 // Fetch user profile via REST API (avoids Firestore SDK offline bug on first load)
 export const fetchUserProfileREST = async (uid, idToken) => {
-  const url = `https://firestore.googleapis.com/v1/projects/kalustohallinta/databases/kalustohallinta/documents/users/${uid}`;
+  const url = `https://firestore.googleapis.com/v1/projects/specto-fleet/databases/specto-fleet/documents/users/${uid}`;
   const res  = await fetch(url, { headers: { Authorization: `Bearer ${idToken}` } });
   if (!res.ok) return null;
   const json = await res.json();
