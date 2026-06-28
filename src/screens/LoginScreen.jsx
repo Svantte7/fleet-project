@@ -22,7 +22,7 @@ export default function LoginScreen({ navigate }) {
       const profile = await fetchUserProfileREST(uid, token);
       if (profile && profile.active) {
         if (profile.mustChangePIN) {
-          navigate('changePin', { userId: uid, forced: true });
+          navigate('changePin', { userId: uid, forced: true, userName: profile.name });
         } else {
           navigate(profile.role === 'admin' ? 'adminHome' : 'driverHome', { userId: uid, userName: profile.name });
         }

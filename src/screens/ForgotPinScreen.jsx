@@ -71,7 +71,7 @@ export function ForgotPinScreen({ navigate }) {
 
 // ── Change PIN ─────────────────────────────────────────────────────────────────
 export function ChangePinScreen({ navigate, params }) {
-  const { userId, forced } = params;
+  const { userId, forced, userName } = params;
   const [p1,   setP1]  = useState('');
   const [p2,   setP2]  = useState('');
   const [err,  setErr] = useState('');
@@ -85,7 +85,7 @@ export function ChangePinScreen({ navigate, params }) {
       await changePIN(p1);
       await updateUserProfile(userId, { mustChangePIN: false });
       const profile = await getUserProfile(userId);
-      navigate(profile.role === 'admin' ? 'adminHome' : 'driverHome', { userId });
+      navigate(profile.role === 'admin' ? 'adminHome' : 'driverHome', { userId, userName: profile.name || userName || '' });
     } catch (e) {
       if (e.code === 'auth/requires-recent-login') {
         setErr('Kirjaudu uudelleen sisään ennen PIN:n vaihtoa.');

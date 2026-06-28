@@ -9,7 +9,8 @@ import AppHeader from '../components/AppHeader.jsx';
 import CameraModal from '../components/CameraModal.jsx';
 
 export default function PhotoScreen({ navigate, params }) {
-  const { userId, truckReg, trailerReg, userName } = params;
+  const { userId, truckReg, trailerReg } = params;
+  const userName = params.userName || 'Tuntematon';
   const [photos,    setPhotos]    = useState({});
   const [dmgPhotos, setDmgPhotos] = useState([]);
   const [dmgDesc,   setDmgDesc]   = useState('');
