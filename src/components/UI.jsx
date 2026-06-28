@@ -14,8 +14,11 @@ export function Btn({ children, onClick, variant = 'primary', disabled = false, 
         background: bg, color, border, borderRadius: 12,
         padding: sm ? '8px 16px' : '13px 20px',
         fontSize: sm ? 13 : 15, fontWeight: 700,
+        minHeight: sm ? 38 : 46,
         width: full ? '100%' : 'auto', cursor: disabled ? 'not-allowed' : 'pointer',
         opacity: disabled ? 0.4 : 1, transition: 'opacity 0.15s',
+        whiteSpace: 'nowrap',
+        touchAction: 'manipulation',
         fontFamily: 'inherit', ...style,
       }}
     >
@@ -31,7 +34,10 @@ export function Card({ children, onClick, style = {} }) {
       style={{
         background: C.surface, borderRadius: 14, padding: '16px',
         boxShadow: '0 2px 12px rgba(27,43,59,0.08)', marginBottom: 12,
-        cursor: onClick ? 'pointer' : 'default', ...style,
+        cursor: onClick ? 'pointer' : 'default',
+        minWidth: 0,
+        overflowWrap: 'anywhere',
+        ...style,
       }}
     >
       {children}
@@ -56,6 +62,7 @@ export function Field({ label, value, onChange, placeholder, type = 'text', mono
           width: '100%', padding: '12px 14px', borderRadius: 11,
           border: `1.5px solid ${C.border}`, fontSize: 15, fontWeight: 600,
           color: C.text, background: C.surface, outline: 'none',
+          minHeight: 46,
           fontFamily: mono ? 'monospace' : 'inherit',
           letterSpacing: mono ? '0.1em' : 'normal',
           textAlign: mono ? 'center' : 'left',
@@ -71,7 +78,7 @@ export function Toggle({ label, sub, value, onChange }) {
       onClick={() => onChange(!value)}
       style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', padding: '10px 0' }}
     >
-      <div>
+      <div style={{ minWidth: 0 }}>
         <div style={{ fontSize: 14, fontWeight: 700, color: C.text }}>{label}</div>
         {sub && <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>{sub}</div>}
       </div>
@@ -91,7 +98,7 @@ export function Toggle({ label, sub, value, onChange }) {
 
 export function Badge({ children, color, bg }) {
   return (
-    <span style={{ background: bg, color, fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 18, whiteSpace: 'nowrap' }}>
+    <span style={{ background: bg, color, fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 18, whiteSpace: 'nowrap', flexShrink: 0 }}>
       {children}
     </span>
   );

@@ -7,7 +7,7 @@ service cloud.firestore {
     function isSignedIn()  { return request.auth != null; }
     function uid()         { return request.auth.uid; }
     function userDoc()     { return get(/databases/$(database)/documents/users/$(uid())).data; }
-    function isAdmin()     { return isSignedIn() && userDoc().role == 'admin'; }
+    function isAdmin()     { return isSignedIn() && (userDoc().role == 'admin' || userDoc().role == 'moderator'); }
     function isActive()    { return isSignedIn() && userDoc().active == true; }
 
     match /users/{userId} {

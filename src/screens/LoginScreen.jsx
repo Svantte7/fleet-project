@@ -1,40 +1,43 @@
 // src/screens/LoginScreen.jsx
 import { useState } from 'react';
-import { loginWithEmail, nameToEmail } from '../firebase/auth.js';
+import { loginWithEmail, normalizeLoginEmail } from '../firebase/auth.js';
 import { fetchUserProfileREST } from '../firebase/config.js';
 import { C } from '../utils/theme.js';
 import { SpectoWordmark } from '../components/SprectoLogo.jsx';
 
-export default function LoginScreen({ navigate }) {
+export default function LoginScreen({ navigate, device }) {
+  const isPhone = device?.isPhone;
   const [name, setName] = useState('');
   const [pin,  setPin]  = useState('');
   const [err,  setErr]  = useState('');
   const [busy, setBusy] = useState(false);
 
   const login = async () => {
-    if (!name.trim() || !pin.trim()) { setErr('Syota nimi ja PIN.'); return; }
+    if (!name.trim() || !pin.trim()) { setErr('Syötä sähköposti ja salasana.'); return; }
     setBusy(true); setErr('');
     try {
-      const email = nameToEmail(name);
+      const email = normalizeLoginEmail(name);
       const cred  = await loginWithEmail(email, pin);
       const uid   = cred.user.uid;
       const token = await cred.user.getIdToken();
       const profile = await fetchUserProfileREST(uid, token);
       if (profile && profile.active) {
-        if (profile.mustChangePIN) {
+        if (profile.mustChangePIN && profile.role !== 'admin') {
           navigate('changePin', { userId: uid, forced: true, userName: profile.name });
         } else {
-          navigate(profile.role === 'admin' ? 'adminHome' : 'driverHome', { userId: uid, userName: profile.name });
+          navigate(profile.role === 'admin' || profile.role === 'moderator' ? 'adminHome' : 'driverHome', { userId: uid, userName: profile.name, role: profile.role });
         }
       } else {
-        setErr('Kayttajatili ei ole aktiivinen.');
+        setErr(email.includes('@kalustohallinta.local')
+          ? 'Vanha samanniminen käyttäjätili ei ole aktiivinen. Kirjaudu uuden tunnuksen sähköpostiosoitteella.'
+          : 'Käyttäjätili ei ole aktiivinen.');
         setBusy(false);
       }
     } catch (e) {
       if (e.code === 'auth/invalid-credential' || e.code === 'auth/wrong-password' || e.code === 'auth/user-not-found') {
-        setErr('Virheellinen nimi tai PIN-koodi.');
+        setErr('Virheellinen sähköposti tai salasana.');
       } else {
-        setErr('Kirjautuminen epaonnistui: ' + e.message);
+        setErr('Kirjautuminen epäonnistui: ' + e.message);
       }
       setBusy(false);
     }
@@ -49,21 +52,23 @@ export default function LoginScreen({ navigate }) {
 
   return (
     <div style={{
-      minHeight: '100vh',
+      minHeight: '100dvh',
       background: `linear-gradient(160deg, ${C.navy} 0%, ${C.navyLight} 55%, #9B1010 100%)`,
-      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 22,
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: isPhone ? 'flex-start' : 'center',
+      padding: isPhone ? 'calc(30px + env(safe-area-inset-top)) 16px calc(18px + env(safe-area-inset-bottom))' : 22,
+      overflowX: 'hidden',
     }}>
       {/* Logo */}
-      <div style={{ marginBottom: 40, textAlign: 'center' }}>
-        <SpectoWordmark dark={false} size={42} />
+      <div style={{ marginBottom: isPhone ? 28 : 40, textAlign: 'center', marginTop: isPhone ? 10 : 0 }}>
+        <SpectoWordmark dark={false} size={isPhone ? 34 : 42} />
       </div>
 
       {/* Card */}
       <div style={{
-        width: '100%', maxWidth: 360,
+        width: '100%', maxWidth: isPhone ? 420 : 360,
         background: 'rgba(255,255,255,0.07)',
         backdropFilter: 'blur(12px)',
-        borderRadius: 22, padding: '26px 22px',
+        borderRadius: isPhone ? 18 : 22, padding: isPhone ? '22px 16px' : '26px 22px',
         border: '1px solid rgba(255,255,255,0.12)',
         boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
       }}>
@@ -71,18 +76,19 @@ export default function LoginScreen({ navigate }) {
           Kirjautuminen
         </div>
 
-        <label style={{ display: 'block', color: 'rgba(255,255,255,0.5)', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 5 }}>NIMI</label>
-        <input value={name} onChange={e => setName(e.target.value)} placeholder="Etunimi Sukunimi"
+        <label style={{ display: 'block', color: 'rgba(255,255,255,0.5)', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 5 }}>SÄHKÖPOSTI</label>
+        <input value={name} onChange={e => setName(e.target.value)} placeholder="nimi@yritys.fi"
+          autoComplete="username" inputMode="email"
           onKeyDown={e => e.key === 'Enter' && login()} style={inp()} disabled={busy} />
 
-        <label style={{ display: 'block', color: 'rgba(255,255,255,0.5)', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 5 }}>PIN-KOODI</label>
+        <label style={{ display: 'block', color: 'rgba(255,255,255,0.5)', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 5 }}>SALASANA</label>
         <input type="password" value={pin} onChange={e => setPin(e.target.value)} placeholder="••••"
           onKeyDown={e => e.key === 'Enter' && login()}
           style={inp({ fontSize: 24, letterSpacing: '0.35em', textAlign: 'center' })} disabled={busy} />
 
         <div style={{ textAlign: 'right', marginBottom: 14 }}>
           <button onClick={() => navigate('forgotPin')} style={{ background: 'none', border: 'none', color: '#FCA5A5', fontSize: 12, cursor: 'pointer', textDecoration: 'underline' }}>
-            PIN unohtunut?
+            Salasana unohtunut?
           </button>
         </div>
 
@@ -104,7 +110,7 @@ export default function LoginScreen({ navigate }) {
       </div>
 
       {/* Footer */}
-      <div style={{ color: 'rgba(255,255,255,0.18)', fontSize: 11, marginTop: 32, textAlign: 'center', letterSpacing: '0.05em' }}>
+      <div style={{ color: 'rgba(255,255,255,0.18)', fontSize: 11, marginTop: isPhone ? 22 : 32, textAlign: 'center', letterSpacing: '0.05em' }}>
         Specto · Fleet Inspection
       </div>
     </div>

@@ -8,7 +8,7 @@ import { Btn, Card } from '../components/UI.jsx';
 import AppHeader from '../components/AppHeader.jsx';
 import CameraModal from '../components/CameraModal.jsx';
 
-export default function PhotoScreen({ navigate, params }) {
+export default function PhotoScreen({ navigate, params, device }) {
   const { userId, truckReg, trailerReg } = params;
   const userName = params.userName || 'Tuntematon';
   const [photos,    setPhotos]    = useState({});
@@ -86,7 +86,7 @@ export default function PhotoScreen({ navigate, params }) {
   return (
     <div style={{ minHeight: '100vh', background: C.bg }}>
       {camSlot && (
-        <CameraModal sideKey={camSlot} trailerReg={trailerReg} onPhoto={handlePhoto} onClose={() => setCamSlot(null)} />
+        <CameraModal sideKey={camSlot} trailerReg={trailerReg} onPhoto={handlePhoto} onClose={() => setCamSlot(null)} device={device} />
       )}
 
       {lightboxImg && (
@@ -96,9 +96,9 @@ export default function PhotoScreen({ navigate, params }) {
         </div>
       )}
 
-      <AppHeader title="Kuvaus" subtitle={trailerReg} onBack={() => navigate('regInput', { userId, truckReg, trailerReg, userName })} />
+      <AppHeader title="Kuvaus" subtitle={trailerReg} onBack={() => navigate('regInput', { userId, truckReg, trailerReg, userName })} device={device} />
 
-      <div style={{ background: C.surface, padding: '12px 16px', borderBottom: `1px solid ${C.border}` }}>
+      <div style={{ background: C.surface, padding: device?.isPhone ? '10px 12px' : '12px 16px', borderBottom: `1px solid ${C.border}` }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
           <span style={{ fontSize: 13, fontWeight: 700, color: C.text }}>{totalDone} / {total} osiota valmiina</span>
           <span style={{ fontSize: 13, color: C.muted }}>{pct}%</span>
@@ -108,25 +108,25 @@ export default function PhotoScreen({ navigate, params }) {
         </div>
       </div>
 
-      <div style={{ padding: '14px 16px', maxWidth: 600, margin: '0 auto' }}>
+      <div style={{ padding: device?.isPhone ? '12px 10px' : '14px 16px', maxWidth: 600, margin: '0 auto' }}>
         {SIDES.map(side => {
           const ph = photos[side.key];
           return (
             <Card key={side.key} style={{ padding: 0, overflow: 'hidden', marginBottom: 10 }}>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <div style={{ width: 90, height: 90, flexShrink: 0, background: ph ? 'transparent' : `${C.navy}0A`, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', cursor: ph ? 'pointer' : 'default' }}
+              <div style={{ display: 'flex', alignItems: 'center', gap: device?.isPhone ? 0 : 0 }}>
+                <div style={{ width: device?.isPhone ? 78 : 90, height: device?.isPhone ? 78 : 90, flexShrink: 0, background: ph ? 'transparent' : `${C.navy}0A`, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', cursor: ph ? 'pointer' : 'default' }}
                   onClick={() => ph && setLightboxImg(ph.uri)}>
                   {ph
-                    ? <img src={ph.uri} alt={side.label} style={{ width: 90, height: 90, objectFit: 'cover' }} />
+                    ? <img src={ph.uri} alt={side.label} style={{ width: device?.isPhone ? 78 : 90, height: device?.isPhone ? 78 : 90, objectFit: 'cover' }} />
                     : <div style={{ textAlign: 'center' }}><div style={{ fontSize: 26 }}>{side.icon}</div><div style={{ fontSize: 9, color: C.muted, marginTop: 1 }}>Ei kuvaa</div></div>
                   }
                   {ph && <div style={{ position: 'absolute', bottom: 4, right: 4, background: C.success, borderRadius: 9, width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#fff' }}>✓</div>}
                 </div>
-                <div style={{ flex: 1, padding: '10px 13px' }}>
+                <div style={{ flex: 1, minWidth: 0, padding: device?.isPhone ? '9px 10px' : '10px 13px' }}>
                   <div style={{ fontWeight: 800, color: C.text, fontSize: 14 }}>{side.label}</div>
                   {ph && <div style={{ color: C.muted, fontSize: 10, marginTop: 3 }}>{fmtTime(ph.takenAt)}</div>}
                 </div>
-                <div style={{ paddingRight: 14 }}>
+                <div style={{ paddingRight: device?.isPhone ? 8 : 14, flexShrink: 0 }}>
                   <Btn onClick={() => setCamSlot(side.key)} variant={ph ? 'ghost' : 'primary'} sm disabled={saving}>{ph ? '🔄' : '📷'}</Btn>
                 </div>
               </div>
@@ -148,7 +148,7 @@ export default function PhotoScreen({ navigate, params }) {
           {dmgPhotos.length > 0 && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 12 }}>
               {dmgPhotos.map((ph, i) => (
-                <div key={i} style={{ position: 'relative', width: 88, height: 88, borderRadius: 9, overflow: 'hidden', cursor: 'pointer' }} onClick={() => setLightboxImg(ph.uri)}>
+                <div key={i} style={{ position: 'relative', width: device?.isPhone ? 78 : 88, height: device?.isPhone ? 78 : 88, borderRadius: 9, overflow: 'hidden', cursor: 'pointer' }} onClick={() => setLightboxImg(ph.uri)}>
                   <img src={ph.uri} alt={`vaurio ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   <button onClick={e => { e.stopPropagation(); setDmgPhotos(p => p.filter((_, j) => j !== i)); }}
                     style={{ position: 'absolute', top: 3, right: 3, background: 'rgba(217,79,79,0.92)', border: 'none', color: '#fff', borderRadius: 7, width: 22, height: 22, cursor: 'pointer', fontSize: 12, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
@@ -163,7 +163,7 @@ export default function PhotoScreen({ navigate, params }) {
             <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Vaurionkuvaus</label>
             <textarea value={dmgDesc} onChange={e => setDmgDesc(e.target.value)}
               placeholder="Kuvaile havaitut vauriot tai huomiot tarkasti..." rows={3}
-              style={{ width: '100%', padding: '12px 14px', borderRadius: 11, border: `1.5px solid ${C.border}`, fontSize: 13, color: C.text, resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.55, outline: 'none' }} />
+              style={{ width: '100%', padding: '12px 14px', borderRadius: 11, border: `1.5px solid ${C.border}`, fontSize: 16, color: C.text, resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.55, outline: 'none' }} />
           </div>
         </Card>
 

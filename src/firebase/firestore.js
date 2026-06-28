@@ -38,8 +38,19 @@ export const getAllUsers = async () => {
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 };
 
+export const getVisibleUsers = async (viewerRole) => {
+  const users = await getAllUsers();
+  const activeUsers = users.filter(u => u.active !== false);
+  return viewerRole === 'moderator'
+    ? activeUsers.filter(u => u.role !== 'admin')
+    : activeUsers;
+};
+
 export const deactivateUser = (uid) =>
   updateDoc(doc(db, 'users', uid), { active: false });
+
+export const updateUserRole = (uid, role) =>
+  updateDoc(doc(db, 'users', uid), { role });
 
 // ══════════════════════════════════════════════════════════════════════════════
 // INSPECTIONS

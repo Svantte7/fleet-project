@@ -45,7 +45,7 @@ export function AuthProvider({ children }) {
       firebaseUser,
       user: userProfile,
       loading: firebaseUser === undefined,
-      isAdmin:  userProfile?.role === 'admin',
+      isAdmin:  userProfile?.role === 'admin' || userProfile?.role === 'moderator',
       isDriver: userProfile?.role === 'driver',
       refreshProfile,
       updateProfile,

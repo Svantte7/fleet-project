@@ -12,7 +12,7 @@ const GUIDE = {
   damage: { label: 'Vaurio',     hint: 'Kuvaa vaurio läheltä',      icon: '⚠️' },
 };
 
-export default function CameraModal({ sideKey, trailerReg, onPhoto, onClose }) {
+export default function CameraModal({ sideKey, trailerReg, onPhoto, onClose, device }) {
   const videoRef    = useRef(null);
   const canvasRef   = useRef(null);
   const streamRef   = useRef(null);
@@ -174,7 +174,8 @@ export default function CameraModal({ sideKey, trailerReg, onPhoto, onClose }) {
       {/* Top bar */}
       <div style={{
         position: 'absolute', top: 0, left: 0, right: 0,
-        background: 'rgba(0,0,0,0.55)', padding: '12px 16px',
+        background: 'rgba(0,0,0,0.55)',
+        padding: device?.isPhone ? 'calc(10px + env(safe-area-inset-top)) 12px 10px' : '12px 16px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#fff', fontSize: 22, cursor: 'pointer', padding: '4px 8px' }}>✕</button>
@@ -207,7 +208,8 @@ export default function CameraModal({ sideKey, trailerReg, onPhoto, onClose }) {
       {/* Bottom controls */}
       <div style={{
         position: 'absolute', bottom: 0, left: 0, right: 0,
-        background: 'rgba(0,0,0,0.6)', padding: '20px 24px 32px',
+        background: 'rgba(0,0,0,0.6)',
+        padding: device?.isPhone ? '16px 18px calc(18px + env(safe-area-inset-bottom))' : '20px 24px 32px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-around',
       }}>
         {/* File picker */}
@@ -221,7 +223,7 @@ export default function CameraModal({ sideKey, trailerReg, onPhoto, onClose }) {
           onClick={shoot}
           disabled={busy || status !== 'active'}
           style={{
-            width: 76, height: 76, borderRadius: '50%',
+            width: device?.isPhone ? 72 : 76, height: device?.isPhone ? 72 : 76, borderRadius: '50%',
             background: busy ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.25)',
             border: '4px solid #fff', cursor: busy ? 'not-allowed' : 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
