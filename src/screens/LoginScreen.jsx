@@ -32,10 +32,11 @@ export default function LoginScreen({ navigate, device }) {
         navigate(profile.role === 'admin' || profile.role === 'moderator' ? 'adminHome' : 'driverHome', { userId: uid, userName: profile.name, role: profile.role });
       }
     } catch (e) {
+      console.error('Login error code:', e.code, 'message:', e.message, e);
       if (e.code === 'auth/invalid-credential' || e.code === 'auth/wrong-password' || e.code === 'auth/user-not-found') {
         setErr('Virheellinen sähköposti tai salasana.');
       } else {
-        setErr('Kirjautuminen epäonnistui: ' + e.message);
+        setErr(`Kirjautuminen epäonnistui: ${e.code ?? ''} ${e.message}`);
       }
       setBusy(false);
     }
