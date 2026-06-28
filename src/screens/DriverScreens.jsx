@@ -122,16 +122,29 @@ export function DriverHomeScreen({ navigate, params, device }) {
         <div style={{ fontSize: 21, fontWeight: 900, color: C.text, marginBottom: 3 }}>Hei, {firstName}! 👋</div>
         <div style={{ color: C.muted, fontSize: 13, marginBottom: 20 }}>Aloita uusi kalustontarkastus</div>
 
-        {/* New inspection CTA */}
-        <Card onClick={() => navigate('regInput', { userId, userName })}
+        {/* Ajoonlähtötarkastus CTA */}
+        <Card onClick={() => navigate('regInput', { userId, userName, nextScreen: 'checklist' })}
           style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.navyLight})`, marginBottom: 10, cursor: 'pointer' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <div style={{ width: 52, height: 52, borderRadius: 15, background: 'rgba(252,165,165,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, flexShrink: 0 }}>🚛</div>
+            <div style={{ width: 52, height: 52, borderRadius: 15, background: 'rgba(252,165,165,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, flexShrink: 0 }}>🚦</div>
             <div style={{ flex: 1 }}>
-              <div style={{ color: '#fff', fontWeight: 800, fontSize: 16 }}>Uusi tarkastus</div>
-              <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: 12, marginTop: 2 }}>Syötä rekisteritunnukset ja kuvaa kalusto</div>
+              <div style={{ color: '#fff', fontWeight: 800, fontSize: 16 }}>Ajoonlähtötarkastus</div>
+              <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: 12, marginTop: 2 }}>Tarkista kalusto ennen lähtöä — 9 kohtaa</div>
             </div>
             <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 24 }}>›</div>
+          </div>
+        </Card>
+
+        {/* Kuvaus CTA */}
+        <Card onClick={() => navigate('regInput', { userId, userName, nextScreen: 'photo' })}
+          style={{ marginBottom: 10, cursor: 'pointer', border: `1.5px solid ${C.border}` }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div style={{ width: 52, height: 52, borderRadius: 15, background: `${C.steel}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, flexShrink: 0 }}>📷</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 800, fontSize: 16, color: C.text }}>Kuvaus</div>
+              <div style={{ color: C.muted, fontSize: 12, marginTop: 2 }}>Kuvaa kaluston kunto ennen ja jälkeen</div>
+            </div>
+            <div style={{ color: C.border, fontSize: 24 }}>›</div>
           </div>
         </Card>
 
@@ -185,7 +198,7 @@ export function DriverHomeScreen({ navigate, params, device }) {
 
 // ── Reg Input ─────────────────────────────────────────────────────────────────
 export function RegInputScreen({ navigate, params, device }) {
-  const { userId, userName } = params;
+  const { userId, userName, nextScreen = 'photo' } = params;
   const [truck,    setTruck]    = useState('');
   const [trailer,  setTrailer]  = useState('');
   const [remember, setRemember] = useState(false);
@@ -210,12 +223,12 @@ export function RegInputScreen({ navigate, params, device }) {
   const valid = truck.length >= 2 && trailer.length >= 2;
   const next = () => {
     if (remember && truck.length >= 2) setRememberedTruck(userId, truck);
-    navigate('photo', { userId, userName, truckReg: truck, trailerReg: trailer });
+    navigate(nextScreen, { userId, userName, truckReg: truck, trailerReg: trailer });
   };
 
   return (
     <div style={{ minHeight: '100vh', background: C.bg }}>
-      <AppHeader title="Rekisteritunnukset" onBack={() => navigate('driverHome', { userId, userName })} device={device} />
+      <AppHeader title="Rekisteritunnukset" subtitle={nextScreen === 'checklist' ? 'Ajoonlähtötarkastus' : 'Kuvaus'} onBack={() => navigate('driverHome', { userId, userName })} device={device} />
       <div style={{ padding: device?.isPhone ? '18px 12px' : '22px 16px', maxWidth: 520, margin: '0 auto' }}>
         <div style={{ fontSize: 19, fontWeight: 900, color: C.text, marginBottom: 3 }}>Kaluston tiedot</div>
         <div style={{ color: C.muted, fontSize: 13, marginBottom: 20 }}>Syötä rekisteritunnukset ilman väliviivaa</div>
