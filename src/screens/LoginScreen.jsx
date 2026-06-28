@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { loginWithEmail, normalizeLoginEmail } from '../firebase/auth.js';
 import { fetchUserProfileREST } from '../firebase/config.js';
-import { getUserCount } from '../firebase/firestore.js';
 import { C } from '../utils/theme.js';
 import { SpectoWordmark } from '../components/SprectoLogo.jsx';
 
@@ -23,13 +22,7 @@ export default function LoginScreen({ navigate, device }) {
       const token = await cred.user.getIdToken();
       const profile = await fetchUserProfileREST(uid, token);
       if (!profile) {
-        const count = await getUserCount();
-        if (count === 0) {
-          navigate('setup', { uid, email: cred.user.email });
-        } else {
-          setErr('Käyttäjäprofiilia ei löydy järjestelmästä. Ota yhteyttä ylläpitäjään.');
-          setBusy(false);
-        }
+        navigate('setup', { uid, email: cred.user.email });
       } else if (!profile.active) {
         setErr('Käyttäjätili ei ole aktiivinen. Ota yhteyttä ylläpitäjään.');
         setBusy(false);
