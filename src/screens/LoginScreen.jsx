@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { loginWithEmail, normalizeLoginEmail } from '../firebase/auth.js';
 import { fetchUserProfileREST } from '../firebase/config.js';
+import { getUserCount } from '../firebase/firestore.js';
 import { C } from '../utils/theme.js';
 import { SpectoWordmark } from '../components/SprectoLogo.jsx';
 
@@ -21,17 +22,21 @@ export default function LoginScreen({ navigate, device }) {
       const uid   = cred.user.uid;
       const token = await cred.user.getIdToken();
       const profile = await fetchUserProfileREST(uid, token);
-      if (profile && profile.active) {
-        if (profile.mustChangePIN && profile.role !== 'admin') {
-          navigate('changePin', { userId: uid, forced: true, userName: profile.name });
+      if (!profile) {
+        const count = await getUserCount();
+        if (count === 0) {
+          navigate('setup', { uid, email: cred.user.email });
         } else {
-          navigate(profile.role === 'admin' || profile.role === 'moderator' ? 'adminHome' : 'driverHome', { userId: uid, userName: profile.name, role: profile.role });
+          setErr('Käyttäjäprofiilia ei löydy järjestelmästä. Ota yhteyttä ylläpitäjään.');
+          setBusy(false);
         }
-      } else {
-        setErr(email.includes('@specto-fleet.local')
-          ? 'Vanha samanniminen käyttäjätili ei ole aktiivinen. Kirjaudu uuden tunnuksen sähköpostiosoitteella.'
-          : 'Käyttäjätili ei ole aktiivinen.');
+      } else if (!profile.active) {
+        setErr('Käyttäjätili ei ole aktiivinen. Ota yhteyttä ylläpitäjään.');
         setBusy(false);
+      } else if (profile.mustChangePIN && profile.role !== 'admin') {
+        navigate('changePin', { userId: uid, forced: true, userName: profile.name });
+      } else {
+        navigate(profile.role === 'admin' || profile.role === 'moderator' ? 'adminHome' : 'driverHome', { userId: uid, userName: profile.name, role: profile.role });
       }
     } catch (e) {
       if (e.code === 'auth/invalid-credential' || e.code === 'auth/wrong-password' || e.code === 'auth/user-not-found') {

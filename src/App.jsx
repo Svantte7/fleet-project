@@ -7,6 +7,7 @@ import { ForgotPinScreen, ChangePinScreen } from "./screens/ForgotPinScreen.jsx"
 import { DriverHomeScreen, RegInputScreen, SuccessScreen } from "./screens/DriverScreens.jsx";
 import PhotoScreen from "./screens/PhotoScreen.jsx";
 import ChecklistScreen from "./screens/ChecklistScreen.jsx";
+import SetupScreen from "./screens/SetupScreen.jsx";
 import ProfileScreen from "./screens/ProfileScreen.jsx";
 import { AdminHomeScreen, AdminReportsScreen, AdminUsersScreen } from "./screens/AdminScreens.jsx";
 import { C } from "./utils/theme.js";
@@ -20,6 +21,7 @@ const SCREENS = {
   regInput:     RegInputScreen,
   photo:        PhotoScreen,
   checklist:    ChecklistScreen,
+  setup:        SetupScreen,
   success:      SuccessScreen,
   profile:      ProfileScreen,
   adminHome:    AdminHomeScreen,

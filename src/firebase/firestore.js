@@ -103,6 +103,11 @@ export const subscribeInspections = (cb) =>
     snap => cb(snap.docs.map(d => ({ id: d.id, ...d.data() })))
   );
 
+export const getUserCount = async () => {
+  const snap = await getDocs(collection(db, 'users'));
+  return snap.size;
+};
+
 export const markDamageAcknowledged = (insId, acknowledged) =>
   updateDoc(doc(db, 'inspections', insId), { damageAcknowledged: acknowledged });
 
